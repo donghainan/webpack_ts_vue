@@ -13,8 +13,6 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 // ts-import
 const tsImportPluginFactory = require('ts-import-plugin')
-// 删除无用css
-const PurgecssPlugin = require('purgecss-webpack-plugin')
 // cdn 引入资源
 // tree-shaking es6
 // 多线程打包 happypack
@@ -29,11 +27,11 @@ module.exports = (env) => {
 	const isDev = env.development
 	const base = {
 		devtool: isDev ? 'cheap-module-eval-source-map' : false,
-		entry: path.resolve(__dirname, '../src/index.ts'),
+		entry: path.resolve(__dirname, '../src/main.ts'),
 		output: {
 			filename: '[name].[hash:8].js',
 			path: path.resolve(__dirname, '../dist'),
-			publicPath: isDev ? '/' : './',
+			publicPath: isDev ? '/' : './'
 		},
 		resolve: {
 			extensions: ['.js', '.jsx', '.json', '.css', '.ts', '.tsx', '.vue'],
@@ -81,9 +79,9 @@ module.exports = (env) => {
 				{
 					test: /\.(css|less)$/,
 					use: [
+						'vue-style-loader',
 						// 有bug，样式丢失，无法抽离
-						// isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-						'style-loader',
+						isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
 						{
 							loader: 'css-loader',
 							options: {
@@ -99,7 +97,7 @@ module.exports = (env) => {
 								}
 							}
 						}
-					]
+					].filter(Boolean)
 				},
 				{
 					test: /\.jpe?g|png|gif/,
@@ -162,12 +160,6 @@ module.exports = (env) => {
 			!isDev &&
 				new MiniCssExtractPlugin({
 					filename: 'css/[name].[contentHash:8].css'
-				}),
-			!isDev &&
-				new PurgecssPlugin({
-					paths: glob.sync(`${path.join(__dirname, 'src')}/**/*`, {
-						nodir: true
-					}) // 不匹配目录，只匹配文件
 				}),
 			// 构建时会引用动态链接库的内容
 			isDev &&
