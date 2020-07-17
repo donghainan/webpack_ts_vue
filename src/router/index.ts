@@ -1,30 +1,34 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
+import TransitonView from '@/components/TransitonView.vue'
+
+// 扩展vue-router goBack方法
+// interface NewRouterConfig {
+//   isBack?: boolean
+//   goBack(n: number): void
+// }
+// class NewRouter extends VueRouter implements NewRouterConfig {
+//   public isBack: boolean = false
+//   public goBack() {
+//     console.log('回退')
+//     this.isBack = true
+//     window.history.go(-1)
+//   }
+// }
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'App',
-    component: () => import(/* webpackChunkName: "app" */ '../App.vue'),
-    redirect: '/home',
+    component: TransitonView,
     children: [
       {
-        path: '/home',
+        path: '/',
         name: 'Home',
         component: () => import(/* webpackChunkName: "home" */ '../views/Home.vue'),
         meta: {
-          keepAlive: false,
-          isBack: false
-        }
-      },
-      {
-        path: '/about',
-        name: 'About',
-        component: () => import(/* webpackChunkName: "home" */ '../views/About.vue'),
-        meta: {
-          keepAlive: false,
-          isBack: false
+          keepAlive: true
         }
       },
     ]
@@ -33,7 +37,7 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: '/base/',
   routes
 })
 export default router

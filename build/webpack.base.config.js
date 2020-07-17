@@ -7,6 +7,8 @@ const { merge } = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 // 抽离css
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+// 清空打包结果
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 // vue-loader
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 // ts-import
@@ -16,6 +18,8 @@ const PurgecssPlugin = require('purgecss-webpack-plugin')
 // cdn 引入资源
 // tree-shaking es6
 // 多线程打包 happypack
+// 配置打包cdn
+const WebpackCdnPlugin = require('webpack-cdn-plugin')
 
 // 引入dllplugin
 const DllReferencePlugin = require('webpack/lib/DllReferencePlugin')
@@ -27,40 +31,29 @@ module.exports = (env) => {
 		devtool: isDev ? 'cheap-module-eval-source-map' : false,
 		entry: path.resolve(__dirname, '../src/index.ts'),
 		output: {
-			filename: 'bundle.js',
+			filename: '[name].[hash:8].js',
 			path: path.resolve(__dirname, '../dist'),
+			publicPath: isDev ? '/' : './',
 		},
 		resolve: {
 			extensions: ['.js', '.jsx', '.json', '.css', '.ts', '.tsx', '.vue'],
 			alias: {
-				'@': path.resolve(__dirname, '../src'),
-			},
+				'@': path.resolve(__dirname, '../src')
+			}
 		},
-		externals: {
-			jquery: '$',
-		},
-		optimization: {
-			splitChunks: {
-				chunks: 'all',
-				name: true,
-				cacheGroups: {
-					vendors: {
-						test: /[\\/]node_modules[\\/]/,
-						priority: -10,
-					},
-					default: {
-						minSize: 1, // 不是第三方模块，被引入两次也会被抽离
-						minChunks: 2,
-						priority: -20,
-					},
-				},
-			},
-		},
+		externals: isDev
+			? {}
+			: {
+					vue: 'vue',
+					vuex: 'Vuex',
+					'vue-router': 'VueRouter',
+					axios: 'axios'
+			  },
 		module: {
 			rules: [
 				{
 					test: /\.vue$/,
-					use: 'vue-loader',
+					use: 'vue-loader'
 				},
 				{
 					test: /\.(ts|tsx|js|jsx)$/,
@@ -74,30 +67,39 @@ module.exports = (env) => {
 									tsImportPluginFactory({
 										libraryName: 'vant',
 										libraryDirectory: 'es',
-										style: true,
-									}),
-								],
+										style: true
+									})
+								]
 							}),
 							compilerOptions: {
-								module: 'es2015',
-							},
-						},
+								module: 'es2015'
+							}
+						}
 					},
-					exclude: /node_modules/,
+					exclude: /node_modules/
 				},
 				{
 					test: /\.(css|less)$/,
 					use: [
-						isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+						// 有bug，样式丢失，无法抽离
+						// isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+						'style-loader',
 						{
 							loader: 'css-loader',
 							options: {
-								importLoaders: 2,
-							},
+								importLoaders: 2
+							}
 						},
 						'postcss-loader',
-						'less-loader',
-					],
+						{
+							loader: 'less-loader',
+							options: {
+								lessOptions: {
+									javascriptEnabled: true
+								}
+							}
+						}
+					]
 				},
 				{
 					test: /\.jpe?g|png|gif/,
@@ -107,72 +109,104 @@ module.exports = (env) => {
 							options: {
 								mozjpeg: {
 									progressive: true,
-									quality: 65,
+									quality: 65
 								},
 								// optipng.enabled: false will disable optipng
 								optipng: {
-									enabled: false,
+									enabled: false
 								},
 								pngquant: {
 									quality: [0.9, 0.95],
-									speed: 4,
+									speed: 4
 								},
 								gifsicle: {
-									interlaced: false,
+									interlaced: false
 								},
 								// the webp option will enable WEBP
 								webp: {
-									quality: 75,
-								},
-							},
+									quality: 75
+								}
+							}
 						},
 						{
 							loader: 'url-loader',
 							options: {
 								limit: 100 * 1024,
-								name: `img/[name].[ext]`,
-							},
-						},
-					],
+								name: `img/[name].[ext]`
+							}
+						}
+					]
 				},
 				{
 					test: /\.(woff|ttf|eot|svg|otf)/,
 					use: {
-						loader: 'file-loader',
-					},
-				},
-			],
+						loader: 'file-loader'
+					}
+				}
+			]
 		},
 		plugins: [
 			new VueLoaderPlugin(),
+			new CleanWebpackPlugin(),
 			new HtmlWebpackPlugin({
 				filename: 'index.html',
 				template: path.resolve(__dirname, '../public/index.html'),
 				hash: true,
+				favicon: path.resolve(__dirname, '../public/favicon.ico'),
 				minify: {
 					removeComments: true, // 删除注释
-					removeAttributeQuotes: true, // 删除属性双引号
+					removeAttributeQuotes: true // 删除属性双引号
 				},
+				inject: true
 			}),
 			!isDev &&
 				new MiniCssExtractPlugin({
-					filename: 'css/[name].[contentHash:8].css',
+					filename: 'css/[name].[contentHash:8].css'
 				}),
 			!isDev &&
 				new PurgecssPlugin({
 					paths: glob.sync(`${path.join(__dirname, 'src')}/**/*`, {
-						nodir: true,
-					}), // 不匹配目录，只匹配文件
+						nodir: true
+					}) // 不匹配目录，只匹配文件
 				}),
 			// 构建时会引用动态链接库的内容
-			new DllReferencePlugin({
-				manifest: path.resolve(__dirname, '../dll/manifest.json'),
-			}),
+			isDev &&
+				new DllReferencePlugin({
+					manifest: path.resolve(__dirname, '../dll/manifest.json')
+				}),
 			// 需要手动引入vue.dll.js
-			new AddAssetHtmlWebpackPlugin({
-				filepath: path.resolve(__dirname, '../dll/vue.dll.js'),
-			}),
-		].filter(Boolean),
+			isDev &&
+				new AddAssetHtmlWebpackPlugin({
+					filepath: path.resolve(__dirname, '../dll/vue.dll.js')
+				}),
+
+			!isDev &&
+				new WebpackCdnPlugin({
+					modules: [
+						{
+							name: 'vue',
+							var: 'Vue',
+							path: 'dist/vue.runtime.min.js'
+						},
+						{
+							name: 'vue-router',
+							var: 'VueRouter',
+							path: 'dist/vue-router.min.js'
+						},
+						{
+							name: 'vuex',
+							var: 'Vuex',
+							path: 'dist/vuex.min.js'
+						},
+						{
+							name: 'axios',
+							var: 'axios',
+							path: 'dist/axios.min.js'
+						}
+					],
+					publicPath: '/node_modules'
+				})
+		].filter(Boolean)
 	}
 	if (isDev) {
 		return merge(base, dev)

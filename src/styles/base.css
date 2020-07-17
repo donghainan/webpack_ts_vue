@@ -2,6 +2,9 @@
 
 /* 这个css是初始化的css，在任何项目里面都可以使用 */
 /* 禁用iPhone中Safari的字号自动调整 */
+body,html {
+  height: 100%;
+}
 html {
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -12,6 +15,7 @@ html {
 body {
   font-size: 20px;
   background-color: #fff;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 *{
   -webkit-tap-highlight-color: transparent;
@@ -49,7 +53,7 @@ section {
 img {
   width: 100%;
   height: auto;
-  width: auto \9;
+  border: none;
   /* ie8 */
   display: block;
   -ms-interpolation-mode: bicubic;
@@ -98,11 +102,6 @@ section {
   padding: 0;
 }
 
-body {
-  margin: 0 auto;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
 em,
 i {
   font-style: normal;
@@ -148,10 +147,6 @@ h6 {
   font-size: 100%;
 }
 
-img {
-  border: none;
-}
-
 /*单行溢出*/
 .one-txt-cut {
   overflow: hidden;
@@ -172,7 +167,7 @@ input {
   padding: 5px 10px;
   font-size: 16px;
   border-radius: 6px;
-  caret-color: #FB4D3A;
+  caret-color: #000;
 }
 
 input[type="button"] {
