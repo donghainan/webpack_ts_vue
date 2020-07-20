@@ -37,7 +37,6 @@ export default class Home extends Vue {
 </script>
 
 <style lang="less" scoped>
-@import './home.less';
 .home {
 	background-color: cyan;
 }

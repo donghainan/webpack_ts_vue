@@ -3,10 +3,6 @@
 	"version": "1.0.0",
 	"description": "base project use vue typescript",
 	"main": "index.ts",
-	"sideEffects": [
-		"**/*.css",
-		"**/*.less"
-	],
 	"scripts": {
 		"start": "webpack-dev-server --env.development --config ./build/webpack.base.config.js",
 		"dev:build": "webpack --env.development --config ./build/webpack.base.config.js",
@@ -41,7 +37,6 @@
 		"postcss-loader": "^3.0.0",
 		"postcss-pxtorem": "^5.1.1",
 		"progress-bar-webpack-plugin": "^2.1.0",
-		"purgecss-webpack-plugin": "^2.3.0",
 		"style-loader": "^1.2.1",
 		"terser-webpack-plugin": "^3.0.6",
 		"ts-import-plugin": "^1.6.6",
@@ -49,6 +44,7 @@
 		"tslint": "^6.1.2",
 		"url-loader": "^4.1.0",
 		"vue-loader": "^15.9.3",
+		"vue-style-loader": "^4.1.2",
 		"vue-template-compiler": "^2.6.11",
 		"webpack": "^4.43.0",
 		"webpack-build-notifier": "^2.1.0",
