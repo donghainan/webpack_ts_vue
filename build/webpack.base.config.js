@@ -1,5 +1,4 @@
 const path = require('path')
-const glob = require('glob')
 const dev = require('./wepack.dev.config')
 const prod = require('./webpack.prod.config')
 const { merge } = require('webpack-merge')

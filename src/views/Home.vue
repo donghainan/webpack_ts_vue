@@ -9,7 +9,6 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { Button } from 'vant'
 import { State, namespace } from 'vuex-class'
-import sign from '../utils/service/sign'
 const animateModule = namespace('animate')
 @Component({
 	components: {
@@ -19,19 +18,19 @@ const animateModule = namespace('animate')
 export default class Home extends Vue {
 	@animateModule.State('TRANSITION_NAME') TRANSITION_NAME!: string
 	created() {
-		// this.$http
-		// 	.post({
-		// 		url: this.$api.login,
-		// 		params: {
-		// 			username: 'admin',
-    //       password: '123',
-    //       loading: true,
-    //       jwt: false
-		// 		}
-		// 	})
-		// 	.then((res) => {
-		// 		console.log(res)
-		// 	})
+		this.$http
+			.post({
+				url: this.$api.login,
+				params: {
+					username: 'admin',
+          password: '123',
+          // loading: true,
+          // jwt: false
+				}
+			})
+			.then((res) => {
+				console.log(res)
+			})
 	}
 }
 </script>
