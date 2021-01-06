@@ -55,7 +55,7 @@
 	},
 	"dependencies": {
 		"amfe-flexible": "^2.2.1",
-		"axios": "^0.19.2",
+		"axios": "^0.21.1",
 		"core-js": "^2.6.11",
 		"dayjs": "^1.8.29",
 		"typescript": "^3.9.6",
